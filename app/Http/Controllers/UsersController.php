@@ -12,7 +12,7 @@ class UsersController extends Controller
 {
     public function index()
     {
-        $users = User::paginate(10);
+        $users = User::all();
         
         return view('users.index', [
             'users' => $users,
@@ -32,7 +32,7 @@ class UsersController extends Controller
 
         $data += $this->counts($user);
 
-        return view('users.show', $date 
+        return view('users.show', $data  
         );
 
     }
@@ -67,17 +67,51 @@ class UsersController extends Controller
         return view('users.followers', $data);
     }
     
-    public function store(Request $request, $id)
+    public function favorites($id)
     {
-        \Auth::user()->follow($id);
-        return redirect()->back();
+        $user = User::find($id);
+        $favorites = $user->favorites()->paginate(10);
+
+        $data = [
+            'user' => $user,
+            'users' => $favorites,
+        ];
+
+        $data += $this->counts($user);
+
+        return view('users.favorites', $data);
+    }
+    
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'content' => 'required|max:191',
+        ]);
+
+        $request->user()->microposts()->create([
+            'content' => $request->content,
+        ]);
+
+        return redirect('/');
+        //\Auth::user()->follow($id);
+        //return redirect()->back();
     }
 
     public function destroy($id)
     {
-        \Auth::user()->unfollow($id);
+        //\Auth::user()->unfollow($id);
+        //return redirect()->back();
+        $micropost = \App\Micropost::find($id);
+
+        if (\Auth::user()->id === $micropost->user_id) {
+            $micropost->delete();
+        }
+
         return redirect()->back();
     }
-    
-    
+
+
 }
+    
+    
+    

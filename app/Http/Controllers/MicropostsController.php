@@ -10,7 +10,8 @@ class MicropostsController extends Controller
 {
      public function index()
     {
-        $data = [];
+        
+          $data = [];
         if (\Auth::check()) {
             $user = \Auth::user();
             $microposts = $user->microposts()->orderBy('created_at', 'desc')->paginate(10);
